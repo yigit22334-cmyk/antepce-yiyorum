@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Yönetim Paneli | Antepçe Yiyorum</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="admin-body">
+    <div class="admin-wrapper">
+        <!-- Sol Yönetim Menüsü (Sidebar) -->
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="admin-brand-link">
+                    <span class="brand-icon">🥜</span>
+                    <div>
+                        <strong>Antepçe Yiyorum</strong>
+                        <small>Yönetim &amp; Stok Paneli</small>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="admin-nav">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="admin-nav-item">
+                    📊 Genel Bakış &amp; Stok Uyarıları
+                </a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="admin-nav-item">
+                    📦 Ürün, Fiyat, Stok &amp; Fotoğraf
+                </a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="admin-nav-item">
+                    ➕ Yeni Ürün Ekle
+                </a>
+                <a asp-area="Admin" asp-controller="Categories" asp-action="Index" class="admin-nav-item">
+                    🗂️ Kategori Yönetimi
+                </a>
+                <hr class="admin-nav-divider" />
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="admin-nav-item admin-nav-external">
+                    🌐 Mağazayı Görüntüle
+                </a>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <div class="admin-user-info">
+                    <span>👤 @(User.Identity?.Name ?? "Admin")</span>
+                    <span class="role-badge">Yönetici</span>
+                </div>
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="btn btn-outline btn-sm btn-block" style="border-color:#fff; color:#fff;">
+                        Çıkış Yap
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Sağ İçerik Alanı -->
+        <div class="admin-main">
+            <header class="admin-topbar">
+                <div>
+                    <h1 class="admin-page-title">@ViewData["Title"]</h1>
+                </div>
+                <div class="admin-topbar-actions">
+                    <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="btn btn-primary btn-sm">
+                        + Yeni Ürün Ekle
+                    </a>
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-outline btn-sm">
+                        Mağazaya Git &rarr;
+                    </a>
+                </div>
+            </header>
+
+            <main class="admin-content">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">
+                        ✅ @TempData["SuccessMessage"]
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        ⚠️ @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

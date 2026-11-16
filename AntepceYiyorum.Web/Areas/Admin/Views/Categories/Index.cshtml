@@ -1,0 +1,99 @@
+@model IReadOnlyList<Category>
+@{
+    ViewData["Title"] = "Kategori Yönetimi";
+}
+
+<div class="admin-two-col">
+    <!-- Yeni Kategori Ekleme Kartı -->
+    <section class="admin-panel-card">
+        <div class="panel-card-header">
+            <div>
+                <h2>➕ Yeni Kategori Ekle</h2>
+                <p>Yöresel ürünler için yeni bir kategori grubu oluşturun.</p>
+            </div>
+        </div>
+
+        <form asp-action="Create" method="post" class="admin-form">
+            <div class="form-group">
+                <label class="form-label">Kategori Adı</label>
+                <input type="text" name="Name" class="form-control" placeholder="Örn: Baklava ve Şerbetli Tatlılar" required maxlength="120" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Açıklama</label>
+                <textarea name="Description" rows="3" class="form-control" placeholder="Kategori açıklaması..." maxlength="500"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Listeleme Sırası</label>
+                <input type="number" name="DisplayOrder" value="@(Model.Count + 1)" class="form-control" />
+            </div>
+
+            <div class="form-check-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="IsActive" value="true" checked />
+                    <span>Kategori Aktif</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Kategori Oluştur</button>
+        </form>
+    </section>
+
+    <!-- Mevcut Kategoriler Listesi ve Düzenleme -->
+    <section class="admin-panel-card">
+        <div class="panel-card-header">
+            <div>
+                <h2>🗂️ Mevcut Kategoriler (@Model.Count)</h2>
+                <p>Kategori adını, açıklamasını ve sırasını satır içinden güncelleyebilirsiniz.</p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Kategori Bilgilerini Düzenle</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cat in Model)
+                    {
+                        <tr>
+                            <td>
+                                <form asp-action="Update" method="post" class="quick-update-form">
+                                    <input type="hidden" name="Id" value="@cat.Id" />
+                                    <div class="quick-field" style="flex:2;">
+                                        <label>Kategori Adı</label>
+                                        <input type="text" name="Name" value="@cat.Name" class="form-control form-control-sm" required />
+                                    </div>
+                                    <div class="quick-field" style="flex:3;">
+                                        <label>Açıklama</label>
+                                        <input type="text" name="Description" value="@cat.Description" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="quick-field" style="width:70px;">
+                                        <label>Sıra</label>
+                                        <input type="number" name="DisplayOrder" value="@cat.DisplayOrder" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="quick-checks">
+                                        <label>
+                                            <input type="checkbox" name="IsActive" value="true" @(cat.IsActive ? "checked" : "") />
+                                            Aktif
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">Kaydet</button>
+                                </form>
+                            </td>
+                            <td style="width:90px;">
+                                <form asp-action="Delete" asp-route-id="@cat.Id" method="post" onsubmit="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?');">
+                                    <button type="submit" class="btn btn-danger-outline btn-sm">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

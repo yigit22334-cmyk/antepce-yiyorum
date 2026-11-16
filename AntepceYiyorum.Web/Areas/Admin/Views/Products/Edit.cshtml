@@ -1,0 +1,116 @@
+@model AdminProductFormViewModel
+@{
+    ViewData["Title"] = $"Ürünü Düzenle: {Model.Name}";
+    var categories = ViewBag.Categories as IReadOnlyList<Category> ?? Array.Empty<Category>();
+}
+
+<section class="admin-panel-card">
+    <div class="panel-card-header">
+        <div>
+            <h2>Ürünü Düzenle: @Model.Name</h2>
+            <p>Ürünün fotoğrafını, fiyatını, stoğunu ve tüm açıklamalarını buradan güncelleyebilirsiniz.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline btn-sm">&larr; Ürün Listesine Dön</a>
+    </div>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="admin-form">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="CurrentImageUrl" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="admin-form-grid">
+            <div class="form-group">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CategoryId" class="form-label"></label>
+                <select asp-for="CategoryId" class="form-control">
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="CategoryId" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Price" class="form-label"></label>
+                <input asp-for="Price" type="number" step="0.01" min="0.01" class="form-control" />
+                <span asp-validation-for="Price" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="StockQuantity" class="form-label"></label>
+                <input asp-for="StockQuantity" type="number" min="0" class="form-control" />
+                <span asp-validation-for="StockQuantity" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="WeightLabel" class="form-label"></label>
+                <input asp-for="WeightLabel" class="form-control" />
+                <span asp-validation-for="WeightLabel" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="WeightGrams" class="form-label"></label>
+                <input asp-for="WeightGrams" type="number" min="1" class="form-control" />
+                <span asp-validation-for="WeightGrams" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LowStockThreshold" class="form-label"></label>
+                <input asp-for="LowStockThreshold" type="number" min="1" class="form-control" />
+                <span asp-validation-for="LowStockThreshold" class="field-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ImageFile" class="form-label">Ürün Fotoğrafını Değiştir</label>
+                <input asp-for="ImageFile" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg" class="form-control" onchange="previewProductImage(this)" />
+                <small class="text-muted">Yeni fotoğraf seçmezseniz mevcut fotoğraf korunur.</small>
+                <div style="margin-top:0.65rem; display:flex; align-items:center; gap:1rem;">
+                    <img id="imagePreview"
+                         src="@(string.IsNullOrWhiteSpace(Model.CurrentImageUrl) ? "/images/products/default-product.svg" : Model.CurrentImageUrl)"
+                         alt="@Model.Name"
+                         class="admin-thumb-lg"
+                         onerror="this.src='/images/products/default-product.svg'" />
+                    <span class="text-muted" style="font-size:0.82rem;">Mevcut / Önizleme Görseli</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top:1rem;">
+            <label asp-for="ShortDescription" class="form-label"></label>
+            <input asp-for="ShortDescription" class="form-control" />
+            <span asp-validation-for="ShortDescription" class="field-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" rows="4" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="field-error"></span>
+        </div>
+
+        <div class="form-check-group">
+            <label class="checkbox-label">
+                <input asp-for="IsFeatured" />
+                <span>🌟 Ana Sayfada Öne Çıkan Ürün Olarak Göster</span>
+            </label>
+            <label class="checkbox-label">
+                <input asp-for="IsActive" />
+                <span>✅ Ürün Satışa Açık (Aktif)</span>
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+            <a asp-action="Index" class="btn btn-outline">İptal</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

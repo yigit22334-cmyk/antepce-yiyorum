@@ -1,0 +1,147 @@
+@model AdminProductListViewModel
+@{
+    ViewData["Title"] = "Ürün, Fotoğraf, Fiyat ve Stok Yönetimi";
+    var currentUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<!-- Arama ve Filtreleme Çubuğu -->
+<section class="admin-panel-card" style="margin-bottom: 1.5rem;">
+    <form asp-action="Index" method="get" class="admin-filter-bar">
+        <div class="filter-group">
+            <label>Ürün Ara</label>
+            <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Fıstık, salça, pul biber..." />
+        </div>
+
+        <div class="filter-group">
+            <label>Kategori</label>
+            <select name="categoryId" class="form-control">
+                <option value="">Tüm Kategoriler</option>
+                @foreach (var cat in Model.Categories)
+                {
+                    if (Model.CategoryId == cat.Id)
+                    {
+                        <option value="@cat.Id" selected>@cat.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Stok Durumu</label>
+            <select name="stockFilter" class="form-control">
+                <option value="all" selected="@(Model.StockFilter == "all" ? "selected" : null)">Tümü</option>
+                <option value="low" selected="@(Model.StockFilter == "low" ? "selected" : null)">⚠️ Sadece Kritik Stoktakiler</option>
+                <option value="out" selected="@(Model.StockFilter == "out" ? "selected" : null)">🚨 Stoğu Tükenenler (0 Adet)</option>
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">Filtrele</button>
+            <a asp-action="Index" class="btn btn-outline">Temizle</a>
+        </div>
+    </form>
+</section>
+
+<!-- Ürün Tablosu -->
+<section class="admin-panel-card">
+    <div class="panel-card-header">
+        <div>
+            <h2>Ürün Listesi (@Model.Products.Count Ürün)</h2>
+            <p>Aşağıdaki satırlardan doğrudan <strong>fiyat</strong>, <strong>stok</strong> ve <strong>fotoğraf</strong> güncelleyebilir veya detaylı düzenleme ekranına geçebilirsiniz.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">+ Yeni Ürün Ekle</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Fotoğraf</th>
+                    <th>Ürün Bilgisi</th>
+                    <th>Stok Durumu</th>
+                    <th>Hızlı Fiyat • Stok • Fotoğraf Güncelleme</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model.Products)
+                {
+                    <tr>
+                        <td style="width:80px;">
+                            <img src="@(string.IsNullOrWhiteSpace(product.ImageUrl) ? "/images/products/default-product.svg" : product.ImageUrl)"
+                                 alt="@product.Name"
+                                 class="admin-thumb"
+                                 onerror="this.src='/images/products/default-product.svg'" />
+                        </td>
+                        <td>
+                            <strong>@product.Name</strong>
+                            <div class="text-muted" style="font-size:0.82rem; margin-top:0.2rem;">
+                                @product.Category?.Name • <span class="badge-weight">@product.WeightLabel</span>
+                            </div>
+                        </td>
+                        <td>
+                            @if (product.StockQuantity == 0)
+                            {
+                                <span class="status-pill status-out">Tükendi (0)</span>
+                            }
+                            else if (product.IsLowStock)
+                            {
+                                <span class="status-pill status-low">Kritik (@product.StockQuantity / @product.LowStockThreshold)</span>
+                            }
+                            else
+                            {
+                                <span class="status-pill status-ok">Stokta (@product.StockQuantity adet)</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-action="QuickUpdate" method="post" enctype="multipart/form-data" class="quick-update-form">
+                                <input type="hidden" name="Id" value="@product.Id" />
+                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+
+                                <div class="quick-field">
+                                    <label>Fiyat (₺)</label>
+                                    <input type="number" step="0.01" min="0.01" name="Price" value="@product.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" class="form-control form-control-sm" required />
+                                </div>
+
+                                <div class="quick-field">
+                                    <label>Stok</label>
+                                    <input type="number" min="0" name="StockQuantity" value="@product.StockQuantity" class="form-control form-control-sm" required />
+                                </div>
+
+                                <div class="quick-field">
+                                    <label>Fotoğraf Değiştir</label>
+                                    <input type="file" name="ImageFile" accept=".jpg,.jpeg,.png,.webp,.gif,.svg" class="form-control form-control-sm file-input-compact" />
+                                </div>
+
+                                <div class="quick-checks">
+                                    <label>
+                                        <input type="checkbox" name="IsFeatured" value="true" @(product.IsFeatured ? "checked" : "") />
+                                        Öne Çıkan
+                                    </label>
+                                    <label>
+                                        <input type="checkbox" name="IsActive" value="true" @(product.IsActive ? "checked" : "") />
+                                        Aktif
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-sm">Kaydet</button>
+                            </form>
+                        </td>
+                        <td>
+                            <div class="action-btn-group">
+                                <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-outline btn-sm">Detaylı Düzenle</a>
+                                <form asp-action="Delete" asp-route-id="@product.Id" method="post" onsubmit="return confirm('Bu ürünü silmek / pasife almak istediğinize emin misiniz?');">
+                                    <button type="submit" class="btn btn-danger-outline btn-sm">Sil</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

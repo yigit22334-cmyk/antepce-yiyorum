@@ -1,0 +1,158 @@
+@model AntepceYiyorum.Web.ViewModels.HomeIndexViewModel
+@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<!-- Karşılama (Hero) Alanı -->
+<section class="hero-section">
+    <div class="container hero-grid">
+        <div class="hero-content">
+            <span class="hero-tag">Gaziantep'in Bereketli Topraklarından</span>
+            <h1>Gerçek Antep Lezzetleri, <span class="highlight">Üreticiden Kapınıza</span></h1>
+            <p>
+                Erken hasat boz Antep fıstığı, taş değirmen fıstık ezmesi, güneş kurusu salçalar,
+                ipek pul biber ve el yapımı yuvalama... Hepsi taze, doğal ve stok garantili.
+            </p>
+            <div class="hero-buttons">
+                <a href="#one-cikanlar" class="btn btn-primary">Yöresel Ürünleri Keşfet</a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="btn btn-outline">
+                    ⚙️ Admin: Fotoğraf / Fiyat / Stok Yönet
+                </a>
+            </div>
+        </div>
+        <div class="hero-stats-card">
+            <h3>Platform Durumu (Canlı Veritabanı)</h3>
+            <p class="stats-subtitle">Admin Panelinden Anlık Güncellenebilir Katalog</p>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value">@Model.TotalCategories</span>
+                    <span class="stat-label">Yöresel Kategori</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">@Model.TotalActiveProducts</span>
+                    <span class="stat-label">Aktif Ürün Çeşidi</span>
+                </div>
+            </div>
+            <div class="phase-banner">
+                <strong>✅ Yönetim Paneli Aktif:</strong> Ürün fotoğraflarını, fiyatlarını ve stoklarını <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" style="color:var(--color-green-dark); font-weight:700;">Admin Paneli</a> üzerinden anında değiştirebilirsiniz.
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Öne Çıkan Ürünler -->
+<section id="one-cikanlar" class="section-block">
+    <div class="container">
+        <div class="section-header">
+            <h2>Öne Çıkan Antep Lezzetleri</h2>
+            <p>En çok tercih edilen taze yöresel ürünlerimiz (Admin panelinden güncellenen fotoğraf, fiyat ve stoklar anında yansır)</p>
+        </div>
+
+        <div class="product-grid">
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <article class="product-card">
+                    <div class="product-image-wrap">
+                        <img src="@(string.IsNullOrWhiteSpace(product.ImageUrl) ? "/images/products/default-product.svg" : product.ImageUrl)"
+                             alt="@product.Name"
+                             class="product-card-img"
+                             onerror="this.src='/images/products/default-product.svg'" />
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-area="Admin" asp-controller="Products" asp-action="Edit" asp-route-id="@product.Id" class="product-admin-edit-pill" title="Bu ürünü Admin panelinde düzenle">
+                                ✏️ Düzenle
+                            </a>
+                        }
+                    </div>
+                    <div class="product-card-badge-row">
+                        <span class="badge-category">@product.Category?.Name</span>
+                        <span class="badge-weight">@product.WeightLabel</span>
+                    </div>
+                    <h3 class="product-title">@product.Name</h3>
+                    <p class="product-desc">@product.ShortDescription</p>
+                    <div class="product-footer">
+                        <div class="price-box">
+                            <span class="price-amount">@product.Price.ToString("N2") ₺</span>
+                            @if (product.StockQuantity > 0)
+                            {
+                                <small class="stock-info">Stok: @product.StockQuantity adet</small>
+                            }
+                            else
+                            {
+                                <small class="stock-info" style="color:#B91C1C; font-weight:700;">Stokta Yok</small>
+                            }
+                        </div>
+                        <button type="button" class="btn btn-cart" @(product.StockQuantity == 0 ? "disabled" : "")>
+                            @(product.StockQuantity > 0 ? "Sepete Ekle" : "Tükendi")
+                        </button>
+                    </div>
+                </article>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Kategoriler ve Tüm Ürünler -->
+<section id="kategoriler" class="section-block">
+    <div class="container">
+        <div class="section-header">
+            <h2>Yöresel Kategorilerimiz ve Ürünler</h2>
+            <p>Gaziantep mutfağının özenle seçilmiş @Model.TotalCategories ana ürün grubu</p>
+        </div>
+
+        @foreach (var category in Model.Categories)
+        {
+            <div class="category-showcase" style="margin-bottom: 2.75rem;">
+                <div class="category-card-top" style="margin-bottom: 1rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem;">
+                    <div>
+                        <h3 style="font-size: 1.35rem; color: var(--color-green-dark);">@category.Name</h3>
+                        <p style="font-size: 0.9rem; color: var(--color-text-muted);">@category.Description</p>
+                    </div>
+                    <span class="category-badge">@category.Products.Count ürün</span>
+                </div>
+
+                <div class="product-grid">
+                    @foreach (var product in category.Products)
+                    {
+                        <article class="product-card">
+                            <div class="product-image-wrap">
+                                <img src="@(string.IsNullOrWhiteSpace(product.ImageUrl) ? "/images/products/default-product.svg" : product.ImageUrl)"
+                                     alt="@product.Name"
+                                     class="product-card-img"
+                                     onerror="this.src='/images/products/default-product.svg'" />
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-area="Admin" asp-controller="Products" asp-action="Edit" asp-route-id="@product.Id" class="product-admin-edit-pill">
+                                        ✏️ Düzenle
+                                    </a>
+                                }
+                            </div>
+                            <div class="product-card-badge-row">
+                                <span class="badge-category">@category.Name</span>
+                                <span class="badge-weight">@product.WeightLabel</span>
+                            </div>
+                            <h3 class="product-title">@product.Name</h3>
+                            <p class="product-desc">@product.ShortDescription</p>
+                            <div class="product-footer">
+                                <div class="price-box">
+                                    <span class="price-amount">@product.Price.ToString("N2") ₺</span>
+                                    @if (product.StockQuantity > 0)
+                                    {
+                                        <small class="stock-info">Stok: @product.StockQuantity adet</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="stock-info" style="color:#B91C1C; font-weight:700;">Stokta Yok</small>
+                                    }
+                                </div>
+                                <button type="button" class="btn btn-cart" @(product.StockQuantity == 0 ? "disabled" : "")>
+                                    @(product.StockQuantity > 0 ? "Sepete Ekle" : "Tükendi")
+                                </button>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,63 @@
+@model AntepceYiyorum.Web.ViewModels.Auth.LoginViewModel
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <span class="auth-icon">🔐</span>
+                <h1>Giriş Yap</h1>
+                <p>Antepçe Yiyorum hesabınıza veya Yönetim Paneline giriş yapın</p>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+
+            <form asp-action="Login" asp-controller="Account" method="post" class="auth-form">
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" placeholder="ornek@eposta.com" autocomplete="username" />
+                    <span asp-validation-for="Email" class="field-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label asp-for="Password" class="form-label"></label>
+                        <a asp-action="ForgotPassword" class="forgot-link">Şifremi Unuttum</a>
+                    </div>
+                    <input asp-for="Password" class="form-control" placeholder="••••••••" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="field-error"></span>
+                </div>
+
+                <div class="form-check-row">
+                    <label class="checkbox-label">
+                        <input asp-for="RememberMe" />
+                        <span>Beni Hatırla</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Giriş Yap</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Henüz hesabınız yok mu? <a asp-action="Register">Hemen Üye Olun</a></p>
+                <div class="admin-hint-box">
+                    <strong>💡 Geliştirici / Admin Giriş Bilgisi:</strong><br />
+                    E-Posta: <code>admin@antepceyiyorum.com</code><br />
+                    Şifre: <em>User Secrets'ta tanımlı şifre</em> (Varsayılan: <code>Antep27!Admin2026</code>)
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
